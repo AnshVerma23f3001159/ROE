@@ -1,0 +1,42 @@
+name: Matrix Build with Artifacts (0006634)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14, 16, 18]   # 3 parallel builds
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: matrix-0006634
+        run: |
+          echo "matrix-0006634: Building for Node ${{ matrix.node-version }}"
+          echo "Variant: node-${{ matrix.node-version }}" > variant.info
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Generate build artifact
+        run: |
+          ARTFILE="build-0006634-node${{ matrix.node-version }}.txt"
+          echo "Build artifact for node ${{ matrix.node-version }}" > "$ARTFILE"
+          echo "Runner: $RUNNER_OS" >> "$ARTFILE"
+          echo "Commit: $GITHUB_SHA" >> "$ARTFILE"
+          ls -l "$ARTFILE"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-0006634-node${{ matrix.node-version }}
+          path: build-0006634-node${{ matrix.node-version }}.txt
